@@ -35,7 +35,7 @@ object TransformTest {
       .keyBy("id")
 //      .keyBy( data => data.id )
 //      .keyBy( new MyIDSelector() )
-//      .min("temperature")    // 取当前sensor的最小温度值 这个取最小值都是只是字段会变其它的都是第一个的值
+//      .min("temperature")    // 取当前sensor的最小温度值 这个取最小值都是只是字段会变其它的都是第一个的值 sum也是可以的
 //        .reduce(new MyReduce)
       .reduce( (curRes, newData) =>
       SensorReading(curRes.id, curRes.timestamp.max(newData.timestamp), curRes.temperature.min(newData.temperature))
@@ -63,6 +63,7 @@ object TransformTest {
       data => (data.id, data.temperature)
 //      new MyMapper
     )
+    // 泛型是二元组+Double
     val connectedStreams: ConnectedStreams[(String, Double), SensorReading] = warningStream
       .connect(lowTempStream)
     val resultStream: DataStream[Object] = connectedStreams.map(
@@ -78,8 +79,9 @@ object TransformTest {
   }
 }
 
-// 自定义函数类，key选择器
+// 自定义函数类，key选择器 泛型前面的类型是input的类型 后i面是返回的key的类型
 class MyIDSelector() extends KeySelector[SensorReading, String]{
+  // 里面必须要实现一个getKey的方法
   override def getKey(value: SensorReading): String = value.id
 }
 
