@@ -41,7 +41,7 @@ object TransformTest {
       SensorReading(curRes.id, curRes.timestamp.max(newData.timestamp), curRes.temperature.min(newData.temperature))
     )    // 聚合出每个sensor的最大时间戳和最小温度值
 
-    // 3. 分流
+    // 3.  分流
     val splitStream: SplitStream[SensorReading] = dataStream
       .split( data => {
         if( data.temperature > 30 )
