@@ -38,11 +38,9 @@ object High5 {
     /**
      * 聚合查找
      * 1 2 3 4 5 6..100
-     * op: (c1, c2) => r
+     * op: (c1,  c2) => r
      * c1表示上次聚合的结果, c2这次参与聚合的元素
-     *
      * @param arr
-     *
      */
     def reduce(arr: Array[Int], op: (Int, Int) => Int): Int = {
         var lastReduce = arr(0)
@@ -64,7 +62,7 @@ object High5 {
         for (elem <- arr) yield op(elem)
     }
     
-    
+
     /**
      * 使用给定的条件对数组进行过滤
      *
