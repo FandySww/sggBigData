@@ -4,10 +4,11 @@ object High2 {
     def main(args: Array[String]): Unit = {
         // 这里就是函数了
         /*val f = foo _  // 把方法转成了函数
-        
+
         f(10)
         foo(10)*/
-        
+        val ff:Int=>Unit = foo
+        ff(10)
         // 直接定义函数
         // 函数不能声明返回值类型, 只能靠推导
         // () => {  }

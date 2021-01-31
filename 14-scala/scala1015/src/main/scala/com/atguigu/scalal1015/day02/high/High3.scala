@@ -9,10 +9,10 @@ object High3 {
 //        println(add1(10, 20))
 //        println(add2(10, 20))
     
-//        val r: Int = foo(add)
-//        val r: Int = foo(add _)
-//        println(r)
-        
+        val r: Int = foo(add)
+        val r1: Int = foo(add _)
+        println(r)
+        println(r1)
         
         foo1(add1 _)
         
@@ -20,7 +20,7 @@ object High3 {
     
     def add1 = println("add1...")
     def foo1(op: () => Unit) = op()
-    
+
     
     
     def foo(op: (Int,Int) => Int) = {
