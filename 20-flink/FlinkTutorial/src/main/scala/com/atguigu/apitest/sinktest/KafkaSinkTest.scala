@@ -27,12 +27,12 @@ object KafkaSinkTest {
 
 //    val inputStream = env.readTextFile("D:\\Projects\\BigData\\FlinkTutorial\\src\\main\\resources\\sensor.txt")
 val properties = new Properties()
-    properties.setProperty("bootstrap.servers", "hadoop102:9092")
+    properties.setProperty("bootstrap.servers", "192.168.244.133:9092")
     properties.setProperty("group.id", "consumer-group")
     properties.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     properties.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     properties.setProperty("auto.offset.reset", "latest")
-    val inputStream = env.addSource( new FlinkKafkaConsumer011[String]("sensor", new SimpleStringSchema(), properties) )
+    val inputStream = env.addSource( new FlinkKafkaConsumer011[String]("datainfo", new SimpleStringSchema(), properties) )
     val dataStream: DataStream[String] = inputStream
       .map(data => {
         val dataArray = data.split(",")
@@ -45,8 +45,8 @@ val properties = new Properties()
     //        new Path("D:\\Projects\\BigData\\FlinkTutorial\\src\\main\\resources\\out.txt"),
     //        new SimpleStringEncoder[String]("UTF-8"))
     //      .build() )
-    inputStream.print()
-    dataStream.addSink(new FlinkKafkaProducer011[String]("hadoop102:9092", "sinkTest", new SimpleStringSchema()))
+    inputStream.print() //最简单的sink操作
+    dataStream.addSink(new FlinkKafkaProducer011[String]("192.168.244.133:9092", "datainfo", new SimpleStringSchema()))
 
     env.execute("kafka sink test")
   }
