@@ -23,19 +23,18 @@ object EsSinkTest {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(1)
-
-    val inputStream = env.readTextFile("D:\\Projects\\BigData\\FlinkTutorial\\src\\main\\resources\\sensor.txt")
+    val inputStream = env.readTextFile("D:\\codeMy\\CODY_MY_AFTER__KE\\sggBigData\\20-flink\\FlinkTutorial\\src\\main\\resources\\sensor.txt")
     val dataStream: DataStream[SensorReading] = inputStream
       .map(data => {
         val dataArray = data.split(",")
         SensorReading(dataArray(0), dataArray(1).toLong, dataArray(2).toDouble)
       })
-
     // 定义一个httpHosts
     val httpHosts = new util.ArrayList[HttpHost]()
     httpHosts.add(new HttpHost("hadoop102", 9200))
     // 定义一个 ElasticsearchSinkFunction
     val esSinkFunc = new ElasticsearchSinkFunction[SensorReading] {
+      // 每每一条数据来了 我到底怎么样往es里面写数据
       override def process(element: SensorReading, ctx: RuntimeContext, indexer: RequestIndexer): Unit = {
         // 包装写入es的数据
         val dataSource = new util.HashMap[String, String]()
@@ -53,7 +52,6 @@ object EsSinkTest {
       }
     }
     dataStream.addSink( new ElasticsearchSink.Builder[SensorReading](httpHosts, esSinkFunc).build() )
-
     env.execute("es sink test")
   }
 }

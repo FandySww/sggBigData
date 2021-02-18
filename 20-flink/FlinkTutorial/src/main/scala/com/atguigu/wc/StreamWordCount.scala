@@ -20,12 +20,11 @@ object StreamWordCount {
     val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
 //    env.setParallelism(8)
 //    env.disableOperatorChaining()
-
-    // 从程序运行参数中读取hostname和port
+//    从程序运行参数中读取hostname和port
 //    val params: ParameterTool = ParameterTool.fromArgs(args)
 //    val hostname: String = params.get("host")
 //    val port: Int = params.getInt("port")
-    // 接受socket文本流
+//    接受socket文本流 监听端口的发送的数据
     val inputDataStream: DataStream[String] = env.socketTextStream("localhost", 7777)
 
     // 定义转换操作，word count

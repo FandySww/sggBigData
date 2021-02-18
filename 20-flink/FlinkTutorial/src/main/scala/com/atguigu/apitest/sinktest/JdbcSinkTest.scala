@@ -1,12 +1,10 @@
 package com.atguigu.apitest.sinktest
-
 import java.sql.{Connection, DriverManager, PreparedStatement}
 
 import com.atguigu.apitest.{MySensorSource, SensorReading}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala._
-
 /**
   * Copyright (c) 2018-2028 尚硅谷 All Rights Reserved
   *
@@ -20,7 +18,6 @@ object JdbcSinkTest {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(1)
-
 //    val inputStream = env.readTextFile("D:\\Projects\\BigData\\FlinkTutorial\\src\\main\\resources\\sensor.txt")
     val inputStream = env.addSource( new MySensorSource() )
     val dataStream: DataStream[SensorReading] = inputStream
@@ -28,13 +25,10 @@ object JdbcSinkTest {
 //        val dataArray = data.split(",")
 //        SensorReading(dataArray(0), dataArray(1).toLong, dataArray(2).toDouble)
 //      })
-
     dataStream.addSink( new MyJdbcSink() )
-
     env.execute("jdbc sink test")
   }
 }
-
 // 自定义一个 SinkFunction
 class MyJdbcSink() extends RichSinkFunction[SensorReading]{
   // 首先定义sql连接，以及预编译语句
@@ -49,6 +43,7 @@ class MyJdbcSink() extends RichSinkFunction[SensorReading]{
     updateStmt = conn.prepareStatement("update temp set temperature = ? where sensor = ?")
   }
 
+  // sinkFunction只有一个方法
   override def invoke(value: SensorReading, context: SinkFunction.Context[_]): Unit = {
     // 执行更新语句
     updateStmt.setDouble(1, value.temperature)
@@ -61,7 +56,7 @@ class MyJdbcSink() extends RichSinkFunction[SensorReading]{
       insertStmt.execute()
     }
   }
-  // 关闭操作
+  // 关闭操作 也是生命周期函数的
   override def close(): Unit = {
     insertStmt.close()
     updateStmt.close()

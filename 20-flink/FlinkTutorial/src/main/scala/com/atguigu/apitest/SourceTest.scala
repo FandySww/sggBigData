@@ -77,14 +77,11 @@ class MySensorSource() extends SourceFunction[SensorReading]{
   override def run(ctx: SourceFunction.SourceContext[SensorReading]): Unit = {
     // 定义一个随机数发生器
     val rand = new Random()
-
-
     // 随机生成 10个传感器的温度值，并且不停在之前温度基础上更新（随机上下波动）
     // 首先生成 10个传感器的初始温度
     var curTemps = 1.to(10).map(
       i => ("sensor_" + i, 60 + rand.nextGaussian() * 20)
     )
-
     // 无限循环，生成随机数据流
       while(running){
         // 在当前温度基础上，随机生成微小波动

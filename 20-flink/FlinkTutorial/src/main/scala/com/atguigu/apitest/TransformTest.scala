@@ -32,11 +32,12 @@ object TransformTest {
 
     // 2. 分组滚动聚合 只有在keyBy之后才可以做分组的滚动聚合的操作的
     val aggStream: DataStream[SensorReading] = dataStream
-      .keyBy("id")
-//      .keyBy( data => data.id )
-//      .keyBy( new MyIDSelector() )
-//      .min("temperature")    // 取当前sensor的最小温度值 这个取最小值都是只是字段会变其它的都是第一个的值 sum也是可以的
-//        .reduce(new MyReduce)
+      .keyBy(0)
+//    .keyBy("id")
+//    .keyBy( data => data.id )
+//    .keyBy( new MyIDSelector() )
+//    .min("temperature")    // 取当前sensor的最小温度值 这个取最小值都是只是字段会变其它的都是第一个的值 sum也是可以的
+//    .reduce(new MyReduce)
       .reduce( (curRes, newData) =>
       SensorReading(curRes.id, curRes.timestamp.max(newData.timestamp), curRes.temperature.min(newData.temperature))
     )    // 聚合出每个sensor的最大时间戳和最小温度值
@@ -98,11 +99,14 @@ class MyMapper extends MapFunction[SensorReading, (String, Double)]{
 }
 
 class MyRichMapper extends RichMapFunction[SensorReading, Int]{
+  // 创建富函数调用的初始化的方法
   override def open(parameters: Configuration): Unit = {}
 
-//  getRuntimeContext.getIndexOfThisSubtask
+  // 获取运行时上下文 获取分区子任务的编号
+  getRuntimeContext.getIndexOfThisSubtask
 
   override def map(value: SensorReading): Int = value.timestamp.toInt
 
+  // 函数关闭的调用方法
   override def close(): Unit = {}
 }
