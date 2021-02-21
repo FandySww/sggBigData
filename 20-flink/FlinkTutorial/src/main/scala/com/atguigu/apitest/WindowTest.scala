@@ -35,7 +35,7 @@ object WindowTest {
         val dataArray = data.split(",")
         SensorReading( dataArray(0), dataArray(1).toLong, dataArray(2).toDouble )
       } )
-      // 秒为单位的
+      // 秒为单位的 确定事件时间的字段
       .assignAscendingTimestamps(_.timestamp * 1000L)
 //      .assignTimestampsAndWatermarks( new MyWMAssigner(1000L) )
      /* .assignTimestampsAndWatermarks( new BoundedOutOfOrdernessTimestampExtractor[SensorReading](Time.seconds(1)) {
