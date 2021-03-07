@@ -19,24 +19,20 @@ object SideOutputTest {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(1)
-
     val inputStream = env.socketTextStream("hadoop102", 7777)
     val dataStream: DataStream[SensorReading] = inputStream
       .map( data => {
         val dataArray = data.split(",")
         SensorReading( dataArray(0), dataArray(1).toLong, dataArray(2).toDouble )
       } )
-
     // 用 ProcessFunction的侧输出流实现分流操作
     val highTempStream: DataStream[SensorReading] = dataStream
       .process( new SplitTempProcessor(30.0) )
-
+    // id温度值长整型的时间戳
     val lowTempStream = highTempStream.getSideOutput( new OutputTag[(String, Double, Long)]("low-temp") )
-
     // 打印输出
     highTempStream.print("high")
     lowTempStream.print("low")
-
     env.execute("side output job")
   }
 }

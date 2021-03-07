@@ -43,6 +43,7 @@ class MySensorSourcMy() extends SourceFunction[SensorReading]{
       val curTs = System.currentTimeMillis()
       // 包装成样例类，用ctx发出数据 ctx搜集起来就发送到flink里面去了
       curTemps.foreach(
+        // 数据靠着这个上下文传出去的
         data => ctx.collect(SensorReading(data._1, curTs, data._2))
       )
       // 定义间隔时间

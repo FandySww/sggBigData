@@ -19,23 +19,23 @@ import org.apache.flink.streaming.api.scala._
 import org.apache.flink.util.Collector
 
 /**
-  * Copyright (c) 2018-2028 尚硅谷 All Rights Reserved
-  *
-  * Project: FlinkTutorial
-  * Package: day5
-  * Version: 1.0
-  *
-  * Created by wushengran on 2020/4/21 11:45
-  */
+ * Copyright (c) 2018-2028 尚硅谷 All Rights Reserved
+ *
+ * Project: FlinkTutorial
+ * Package: day5
+ * Version: 1.0
+ *
+ * Created by wushengran on 2020/4/21 11:45
+ */
 object StateTest {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(1)
 
     // 配置状态后端
-//    env.setStateBackend( new MemoryStateBackend() )
-    env.setStateBackend( new FsStateBackend("") )
-//    env.setStateBackend( new RocksDBStateBackend("", true) )
+    //    env.setStateBackend( new MemoryStateBackend() )
+    env.setStateBackend(new FsStateBackend(""))
+    //    env.setStateBackend( new RocksDBStateBackend("", true) )
 
     // checkpoint相关配置
     // 启用检查点，指定触发检查点的间隔时间(毫秒)
@@ -54,26 +54,26 @@ object StateTest {
 
     val inputStream = env.socketTextStream("hadoop102", 7777)
     val dataStream: DataStream[SensorReading] = inputStream
-      .map( data => {
+      .map(data => {
         val dataArray = data.split(",")
-        SensorReading( dataArray(0), dataArray(1).toLong, dataArray(2).toDouble )
-      } )
+        SensorReading(dataArray(0), dataArray(1).toLong, dataArray(2).toDouble)
+      })
 
     val warningStream: DataStream[(String, Double, Double)] = dataStream
-//        .map( new MyMapper() )
+      //        .map( new MyMapper() )
       .keyBy("id")
-//      .flatMap( new TempChangeWarningWithFlatmap(10.0) )
+      //      .flatMap( new TempChangeWarningWithFlatmap(10.0) )
       .flatMapWithState[(String, Double, Double), Double]({
-      case (inputData: SensorReading, None) => (List.empty, Some(inputData.temperature))
-      case (inputData: SensorReading, lastTemp: Some[Double]) => {
-        val diff = (inputData.temperature - lastTemp.get).abs
-        if( diff > 10.0 ){
-          ( List( (inputData.id, lastTemp.get, inputData.temperature) ), Some(inputData.temperature) )
-        } else {
-          (List.empty, Some(inputData.temperature))
+        case (inputData: SensorReading, None) => (List.empty, Some(inputData.temperature))
+        case (inputData: SensorReading, lastTemp: Some[Double]) => {
+          val diff = (inputData.temperature - lastTemp.get).abs
+          if (diff > 10.0) {
+            (List((inputData.id, lastTemp.get, inputData.temperature)), Some(inputData.temperature))
+          } else {
+            (List.empty, Some(inputData.temperature))
+          }
         }
-      }
-    })
+      })
 
     warningStream.print()
 
@@ -82,7 +82,7 @@ object StateTest {
 }
 
 // 自定义 RichMapFunction
-class TempChangeWarning(threshold: Double) extends RichMapFunction[SensorReading, (String, Double, Double)]{
+class TempChangeWarning(threshold: Double) extends RichMapFunction[SensorReading, (String, Double, Double)] {
   // 定义状态变量，上一次的温度值
   private var lastTempState: ValueState[Double] = _
 
@@ -98,33 +98,33 @@ class TempChangeWarning(threshold: Double) extends RichMapFunction[SensorReading
 
     // 跟当前温度值计算差值，然后跟阈值比较，如果大于就报警
     val diff = (value.temperature - lastTemp).abs
-    if( diff > threshold ){
-      ( value.id, lastTemp, value.temperature )
+    if (diff > threshold) {
+      (value.id, lastTemp, value.temperature)
     } else
-      ( value.id, 0.0, 0.0 )
+      (value.id, 0.0, 0.0)
   }
 }
 
 // 自定义 RichFlatMapFunction，可以输出多个结果
-class TempChangeWarningWithFlatmap(threshold: Double) extends RichFlatMapFunction[SensorReading, (String, Double, Double)]{
+class TempChangeWarningWithFlatmap(threshold: Double) extends RichFlatMapFunction[SensorReading, (String, Double, Double)] {
   lazy val lastTempState: ValueState[Double] = getRuntimeContext.getState(new ValueStateDescriptor[Double]("last-temp", classOf[Double]))
+
   override def flatMap(value: SensorReading, out: Collector[(String, Double, Double)]): Unit = {
     // 从状态中取出上次的温度值
     val lastTemp = lastTempState.value()
     // 更新状态
     lastTempState.update(value.temperature)
-
     // 跟当前温度值计算差值，然后跟阈值比较，如果大于就报警
     val diff = (value.temperature - lastTemp).abs
-    if( diff > threshold ){
-      out.collect( (value.id, lastTemp, value.temperature) )
+    if (diff > threshold) {
+      out.collect((value.id, lastTemp, value.temperature))
     }
   }
 }
 
 // keyed state定义示例
-class MyProcessor extends KeyedProcessFunction[String, SensorReading, Int]{
-//  lazy val myState: ValueState[Int] = getRuntimeContext.getState( new ValueStateDescriptor[Int]("my-state", classOf[Int]) )
+class MyProcessor extends KeyedProcessFunction[String, SensorReading, Int] {
+  //  lazy val myState: ValueState[Int] = getRuntimeContext.getState( new ValueStateDescriptor[Int]("my-state", classOf[Int]) )
   lazy val myListState: ListState[String] = getRuntimeContext.getListState(new ListStateDescriptor[String]("my-liststate", classOf[String]))
   lazy val myMapState: MapState[String, Double] = getRuntimeContext.getMapState(new MapStateDescriptor[String, Double]("my-mapstate", classOf[String], classOf[Double]))
   lazy val myReducingState: ReducingState[SensorReading] = getRuntimeContext.getReducingState(new ReducingStateDescriptor[SensorReading](
@@ -133,8 +133,9 @@ class MyProcessor extends KeyedProcessFunction[String, SensorReading, Int]{
     classOf[SensorReading])
   )
   var myState: ValueState[Int] = _
+
   override def open(parameters: Configuration): Unit = {
-    myState = getRuntimeContext.getState( new ValueStateDescriptor[Int]("my-state", classOf[Int]) )
+    myState = getRuntimeContext.getState(new ValueStateDescriptor[Int]("my-state", classOf[Int]))
   }
 
   override def processElement(value: SensorReading, ctx: KeyedProcessFunction[String, SensorReading, Int]#Context, out: Collector[Int]): Unit = {
@@ -155,9 +156,10 @@ class MyReduceFunction() extends ReduceFunction[SensorReading] {
 }
 
 // operator state示例
-class MyMapper() extends RichMapFunction[SensorReading, Long] with ListCheckpointed[java.lang.Long]{
-//  lazy val countState: ValueState[Long] = getRuntimeContext.getState( new ValueStateDescriptor[Long]("count", classOf[Long]) )
+class MyMapper() extends RichMapFunction[SensorReading, Long] with ListCheckpointed[java.lang.Long] {
+  //  lazy val countState: ValueState[Long] = getRuntimeContext.getState( new ValueStateDescriptor[Long]("count", classOf[Long]) )
   var count: Long = 0L
+
   override def map(value: SensorReading): Long = {
     count += 1
     count
@@ -165,12 +167,12 @@ class MyMapper() extends RichMapFunction[SensorReading, Long] with ListCheckpoin
 
   override def restoreState(state: util.List[java.lang.Long]): Unit = {
     val iter = state.iterator()
-    while(iter.hasNext){
+    while (iter.hasNext) {
       count += iter.next()
     }
-//    for( countState <- state ){
-//      count += countState
-//    }
+    //    for( countState <- state ){
+    //      count += countState
+    //    }
   }
 
   override def snapshotState(checkpointId: Long, timestamp: Long): util.List[java.lang.Long] = {

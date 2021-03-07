@@ -34,6 +34,7 @@ object RedisSinkTest {
     val myMapper = new RedisMapper[SensorReading] {
       // 定义保存数据到redis的命令，hset table_name key value
       override def getCommandDescription: RedisCommandDescription = {
+
         // sensor_temp 表名
         new RedisCommandDescription( RedisCommand.HSET, "sensor_temp" )
       }
