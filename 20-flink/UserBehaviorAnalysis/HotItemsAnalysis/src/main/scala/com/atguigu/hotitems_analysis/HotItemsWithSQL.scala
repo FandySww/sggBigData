@@ -23,7 +23,7 @@ object HotItemsWithSQL {
     env.setParallelism(1)
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
 
-    val inputStream: DataStream[String] = env.readTextFile("D:\\Projects\\BigData\\UserBehaviorAnalysis\\HotItemsAnalysis\\src\\main\\resources\\UserBehavior.csv")
+    val inputStream: DataStream[String] = env.readTextFile("D:\\codeMy\\CODY_MY_AFTER__KE\\sggBigData\\20-flink\\UserBehaviorAnalysis\\HotItemsAnalysis\\src\\main\\resources\\UserBehavior.csv")
     // 将数据转换成样例类类型，并且提取timestamp定义watermark
     val dataStream: DataStream[UserBehavior] = inputStream
       .map( data => {

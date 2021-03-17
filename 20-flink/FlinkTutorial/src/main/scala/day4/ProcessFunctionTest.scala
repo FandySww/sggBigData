@@ -8,8 +8,6 @@ import org.apache.flink.streaming.api.scala._
 import org.apache.flink.util.Collector
 
 /**
- * Copyright (c) 2018-2028 尚硅谷 All Rights Reserved
- *
  * Project: FlinkTutorial
  * Package: day4
  * Version: 1.0

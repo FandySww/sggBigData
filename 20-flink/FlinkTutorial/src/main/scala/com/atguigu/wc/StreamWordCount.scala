@@ -18,25 +18,23 @@ object StreamWordCount {
   def main(args: Array[String]): Unit = {
     // 创建流处理执行环境
     val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
-//    env.setParallelism(8)
+    env.setParallelism(1) // 默认是两倍的线程量
 //    env.disableOperatorChaining()
 //    从程序运行参数中读取hostname和port
 //    val params: ParameterTool = ParameterTool.fromArgs(args)
 //    val hostname: String = params.get("host")
 //    val port: Int = params.getInt("port")
 //    接受socket文本流 监听端口的发送的数据
-    val inputDataStream: DataStream[String] = env.socketTextStream("localhost", 7777)
-
+    val inputDataStream: DataStream[String] = env.socketTextStream("192.168.244.133", 7777)
     // 定义转换操作，word count
-    val resultDataStream: DataStream[(String, Int)] = inputDataStream
-      .flatMap(_.split(" "))   // 以空格分词，打散得到所有的word
+    val resultDataStream: DataStream[(String, Int,String)] = inputDataStream
+      .flatMap(_.split(" "))   // 以空格分词，打散得到所有的word 注意这个是扁平化的
 //      .filter(_.nonEmpty).slotSharingGroup("2")
       .filter(_.nonEmpty)
-      .map( (_, 1) ).disableChaining()  // 转换成(word, count)二元组
+      .map( (_, 1,Thread.currentThread().getName) ).disableChaining()  // 转换成(word, count)二元组
       .keyBy(0)  // 按照第一个元素分组
       .sum(1).startNewChain()  // 按照第二个元素求和
-
-    resultDataStream.print().setParallelism(1)
+    resultDataStream.print()
     env.execute("stream word count job")
   }
 }

@@ -26,7 +26,7 @@ public class WordCount {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         //连接socket获取输入的数据
-        DataStreamSource<String> text = env.socketTextStream("localhost", port, "\n");
+        DataStreamSource<String> text = env.socketTextStream("192.168.244.133", port, "\n");
 
         //计算数据
         DataStream<WordWithCount> windowCount = text.flatMap(new FlatMapFunction<String, WordWithCount>() {
